@@ -5,7 +5,7 @@ from collections.abc import Generator
 
 
 def _read_input() -> Generator[int, None, None]:
-  with open("01.txt", "r") as handle:
+  with open("01-part2.txt", "r") as handle:
     return map(int, handle.readline().split(","))
 
 def main():
@@ -18,8 +18,18 @@ def main():
       squares.append(last_base * last_base)
     next_size = squares[bisect_left(squares, cones)]
     res += next_size - cones
-  print(res)
-        
+  print("Part 1", res, sep="\t")
+  # Part 2
+  last_base = 3
+  frames: list[int] = [8]
+  res = 0
+  for cones in _read_input():
+    while cones > frames[-1]:
+      last_base += 1
+      frames.append(4 * last_base - 4)
+    next_size = frames[bisect_left(frames, cones)]
+    res += next_size - cones
+  print("Part 2:", res, sep="\t")
 
 if __name__ == "__main__":
   main()
