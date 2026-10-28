@@ -5,7 +5,7 @@ from collections.abc import Generator
 
 
 def _read_input() -> Generator[int, None, None]:
-  with open("01-part2.txt", "r") as handle:
+  with open("01-part3.txt", "r") as handle:
     return map(int, handle.readline().split(","))
 
 def main():
@@ -30,6 +30,18 @@ def main():
     next_size = frames[bisect_left(frames, cones)]
     res += next_size - cones
   print("Part 2:", res, sep="\t")
+  # Part 3
+  last_base = 3
+  frames: list[int] = [8]
+  res = 0
+  for cones in _read_input():
+    while cones > frames[-1]:
+      last_base += 2
+      frames.append(last_base * last_base - 1)
+    next_size = frames[bisect_left(frames, cones)]
+    res += next_size - cones
+  print("Part 3:", res, sep="\t")
+
 
 if __name__ == "__main__":
   main()
