@@ -1,6 +1,7 @@
 #!/bin/env python3
 
 from functools import cmp_to_key
+from itertools import product
 
 def _read_input(name: str):
   with open(name, "r") as handle:
@@ -66,6 +67,42 @@ def main():
       chksum += digit
     res += chksum
   print("Part 2:", res, sep="\t")
+  # Part 3
+  res = 0
+  for line in _read_input("02-part3.txt"):
+    alloys = set()
+    cmps = {}
+    for part in line.split(" "):
+      l = int(part[0])
+      ge = part[1] == '>'
+      r = int(part[2])
+      alloys.add(l)
+      alloys.add(r)
+      if ge:
+        cmps[(l, r)] = -1
+        cmps[(r, l)] = 1
+      else:
+        cmps[(l, r)] = 1
+        cmps[(r, l)] = -1
+    # Create transitive hull
+    updated = True
+    while updated:
+      updated = False
+      for pair1, pair2 in product(cmps, cmps):
+        if pair1 == pair2 or cmps[pair1] != cmps[pair2] or pair1[1] != pair2[0]:
+          continue
+        new_pair = pair1[0], pair2[1],
+        if new_pair not in cmps:
+          updated = True
+          cmp_res = cmps[pair1]
+          cmps[new_pair] = cmp_res
+          cmps[(pair2[1], pair1[0])] = -cmp_res
+    chksum = 0
+    for digit in sorted(alloys, key=cmp_to_key(lambda l, r: cmps[(l, r)])):
+      chksum *= 10
+      chksum += digit
+    res += chksum
+  print("Part 3:", res, sep="\t")
     
     
 
