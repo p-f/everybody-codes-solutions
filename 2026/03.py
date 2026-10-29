@@ -1,5 +1,7 @@
 #!/bin/env python3
 
+from itertools import cycle
+
 def _read(path: str) -> list[tuple[int, int]]:
   res: list[tuple[int, int]] = []
   with open(path, "r") as handle:
@@ -21,9 +23,23 @@ def part1():
     res += line_res
   print("Part 1:", res)
 
+def part2():
+  res: int = 0
+  with open("03-part2.txt", "r") as handle:
+    while line := handle.readline():
+      l, r = line[4:].split()
+      exp: int = 0
+      line_res: int = 0
+      for std, base in zip(cycle(reversed(l)), (reversed(r))):
+        line_res += int(base) * (int(std) ** exp)
+        exp += 1
+      res += line_res
+  print("Part 2:", res)
+
 
 def main():
   part1()
+  part2()
 
 
 if __name__ == "__main__":
