@@ -5,7 +5,7 @@ def _read(path: str):
     while l:= handle.readline():
       yield l.strip()
 
-def part12():
+def part123():
   field: list[str] = list(_read("05-part1.txt"))
   rows = len(field)
   cols = len(field[0])
@@ -13,7 +13,7 @@ def part12():
   c = cols // 2
   queue = [(r, c)]
   land = [[0] * cols for _ in range(rows)]
-  land[r][c] = True
+  land[r][c] = 1
   landsize = 1
   def _neigh(rr: int, cc: int):
     for dr in (-1, 0, 1):
@@ -68,16 +68,47 @@ def part12():
         sandsize += 1
         queue.append((r, c))
   print("Part 2:", sandsize)
-
-def part3():
-  _read("05-part3.txt")
-  res = 0
-  print("Part 3:", res)
+  treesize = 0
+  for r in range(2, rows - 2):
+    for c in range(2, cols - 2):
+      if land[r][c] != 1: continue
+      landcount = 0
+      for rt in range(r - 2, r + 3):
+        for ct in range(c - 2, c + 3):
+          if (land[rt][ct] == 1 or land[rt][ct] == 3) and not (abs(rt - r) == 2 and abs(ct - c) == 2):
+            landcount += 1
+      if landcount == 21:
+        land[r][c] = 3
+        treesize += 1
+  # print(treesize)
+  # for l in land:
+  #   print(*l, sep="")
+  for _ in (1, 2):
+    for r in range(1, rows - 1):
+      for c in range(1, cols - 1):
+        if land[r][c] != 1: continue
+        treecount = 0
+        for (rn, cn) in _neigh(r, c):
+          if land[rn][cn] == 3:
+            treecount += 1
+          elif land[rn][cn] == 2:
+            treecount = 0
+            break
+        if treecount >= 4:
+          land[r][c] = 4 # tmp
+          treesize += 1
+    for r in range(rows):
+      for c in range(cols):
+        if land[r][c] == 4:
+          land[r][c] = 3
+    # print(treesize)
+    # for l in land:
+    #   print(*l, sep="")
+  print("Part 3:", treesize)
 
 
 def main():
-  part12()
-  part3()
+  part123()
 
 
 if __name__ == "__main__":
