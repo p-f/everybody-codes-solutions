@@ -16,13 +16,10 @@ def _read(path: str) -> list[Rule]:
       rules.append((int(id), int(energy), list(map(int, connections.split(",")))))
   return rules
 
-          
-
-def part1():
-  rules: list[Rule] = _read("07-part1.txt")
+def _propagate(rules: list[Rule], initial: int) -> int:
   current: list[int] = [max(rules, key=lambda r: len(r[2]))[0]]
   total: int = 0
-  energy: int = 5
+  energy: int = initial
   while current and energy:
       total += len(current) * energy
       next: list[int] = []
@@ -30,11 +27,19 @@ def part1():
         next += rules[c - 1][2]
       current = next
       energy -= 1
-  print("Part 1", total + sum(r[1] for r in rules))
+  return total + sum(r[1] for r in rules)
 
+def part1():
+  rules: list[Rule] = _read("07-part1.txt")
+  print("Part 1", _propagate(rules, 5))
+
+def part2():
+  rules: list[Rule] = _read("07-part2.txt")
+  print("Part 1", _propagate(rules, 10))
 
 def main():
   part1()
+  part2()
 
 if __name__ == "__main__":
   main()
