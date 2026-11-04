@@ -18,17 +18,18 @@ def _read(path: str) -> list[Rule]:
   return rules
 
 def _propagate(rules: list[Rule], initial: int) -> int:
-  current: list[int] = [max(rules, key=lambda r: len(r[2]))[0]]
-  total: int = 0
+  energies: list[int] = [r[1] for r in rules]
+  current: Counter[int] = Counter([max(rules, key=lambda r: len(r[2]))[0] - 1])
   energy: int = initial
-  while current and energy:
-      total += len(current) * energy
-      next: list[int] = []
-      for c in current:
-        next += rules[c - 1][2]
+  while energy:
+      next: Counter[int] = Counter()
+      for id, count in current.items():
+        energies[id] += energy * count
+        for out in rules[id][2]:
+          next[out - 1] += count
       current = next
       energy -= 1
-  return total + sum(r[1] for r in rules)
+  return sum(energies)
 
 def part1():
   rules: list[Rule] = _read("07-part1.txt")
@@ -71,7 +72,7 @@ def part3():
 
 def main():
   part1()
-  # part2()
+  part2()
   part3()
 
 if __name__ == "__main__":
