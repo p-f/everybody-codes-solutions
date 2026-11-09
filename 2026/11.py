@@ -2,7 +2,7 @@
 
 
 from collections import defaultdict
-from itertools import pairwise
+from itertools import pairwise, product
 
 type Graph = dict[int, set[int]]
 
@@ -60,13 +60,10 @@ def part1():
   res_orig: int = (nodes // 2) ** 2 * nodes
   print("Part 1", res_orig - res)
 
-def _agg_dists(g: Graph) -> tuple[int, int, int]:
+def _agg_dists(g: Graph) -> int:
   nodes: int = len(g)
   res: int = 0
   nodes: int
-  max_dist: int = 0
-  sm, dm = -1, -1
-  c_degree = 0
   for start in g:
     dist = [-1] * nodes
     dist[start] = 0
@@ -78,36 +75,27 @@ def _agg_dists(g: Graph) -> tuple[int, int, int]:
         if dist[neigh] == -1:
           dist[neigh] = head_dist + 1
           queue.append(neigh)
-    md = max(dist)
-    if md >= max_dist:
-      max_dist = md
-      candidates: list[int] = []
-      for d in range(nodes):
-        if dist[d] == md:
-          candidates.append(d)
-      d_candidate = max(candidates, key=lambda v: len(g[v]))
-      conn = len(g[start]) + len(g[d_candidate])
-      if md > max_dist or conn > c_degree:
-        sm = start
-        dm = d_candidate
-        c_degree = conn
     res += sum(dist)
-  return res, sm, dm
+  return res
 
 def part2():
   graph: Graph
   short: list[tuple[int, int]]
   graph, short = _read2("11-part2.txt")
-  res_orig, _, _ = _agg_dists(graph)
+  res_orig = _agg_dists(graph)
   for s, d in short:
     graph[s].add(d)
     graph[d].add(s)
-  _, opt_s, opt_d = _agg_dists(graph)
-  print("Short", short, opt_s, opt_d)
-  graph[opt_s].add(opt_d)
-  graph[opt_d].add(opt_s)
-  res, _, _ = _agg_dists(graph)
-  print("Part 2:", res_orig - res)
+  min_res = _agg_dists(graph)
+  for ss, dd in product(graph, graph):
+    if ss == dd or dd in graph[ss]:
+      continue
+    graph[ss].add(dd)
+    graph[dd].add(ss)
+    min_res = min(min_res, _agg_dists(graph))
+    graph[dd].remove(ss)
+    graph[ss].remove(dd)
+  print("Part 2:", res_orig - min_res)
 
 
 def main():
