@@ -29,6 +29,7 @@ def _sort_using_flips(pieces: list[str]) -> tuple[int, int]:
     left += 1
     flips += 1
     flipped += next_end - left + 1
+    # print("Progress", left / len(pieces) * 100)
   return flips, flipped
 
 def part1():
@@ -41,12 +42,41 @@ def part2():
   _, flipped = _sort_using_flips(pieces)
   print("Part 2", flipped, sep="\t")
 
+def _sort_by_picking(pieces: list[str]) -> int:
+  left: int = 0
+  right: int = len(pieces) - 1
+  flips: int = 0
+  extra: list[str] = []
+  current: str = pieces[left]
+  while left <= right:
+    # Go to end of left group
+    while left <= right and pieces[left] == current: left += 1
+    # Find group on the right
+    while right >= left and (pr := pieces[right]) != current:
+      extra.append(pr)
+      right -= 1
+    flips += right - left + 1
+    # Now flipped, go the end of next group (now from end)
+    while right >= left and pieces[right] == current: right -= 1
+    # Find group on the left
+    while left <= right and (pl := pieces[left]) != current:
+      extra.append(pl)
+      left += 1
+    flips += right - left + 1
+  # Remaining characters will exclude current one -> will terminate when all are picked
+  if extra: flips += _sort_by_picking(extra)
+  return flips
+
+def part3():
+  pieces: list[str] = list(_read("15-part3.txt")) * 100
+  flipped = _sort_by_picking(pieces)
+  print("Part 2", flipped, sep="\t")
+
   
 def main():
   part1()
   part2()
-  # part3()
-
+  part3()
 
 if __name__ == "__main__":
   main()
