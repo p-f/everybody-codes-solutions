@@ -12,42 +12,34 @@ def _read(file: str) -> list[Rule]:
       lines.append((x, y,))
   return lines
 
+def _compress_pass_left_to_right(rules: list[Rule]):
+  left: int = 0
+  while left < len(rules):
+    yield rules[left]
+    left_height: int = rules[left][1]
+    right: int = left
+    for right_candidate in range(left + 1, len(rules)):
+      right_height: int = rules[right_candidate][1]
+      if right_height == left_height:
+        right = right_candidate
+      elif right_height > left_height:
+        right = right_candidate
+        break # Cannot continue
+    if right > left:
+      left = right
+    else:
+      left += 1
+
 def _compress_rules(rules: list[Rule]) -> list[Rule]:
   rules.sort()
   changed: bool = True
   while changed:
-    changed = False
     # Pass left to right
-    for left in range(len(rules)):
-      left_height: int = rules[left][1]
-      right: int = left
-      for right_candidate in range(left + 1, len(rules)):
-        right_height: int = rules[right_candidate][1]
-        if right_height == left_height:
-          right = right_candidate
-        elif right_height > left_height:
-          right = right_candidate
-          break # Cannot continue
-      if right > (left + 1):
-        changed = True
-        del rules[left + 1: right]
-        break
-    if changed: continue
+    old_size: int = len(rules)
+    rules = list(_compress_pass_left_to_right(rules))
     # Pass right to left
-    for right in range(len(rules) - 1, -1, -1):
-      right_height: int = rules[right][1]
-      left: int = right
-      for left_candidate in range(right - 1, -1, -1):
-        left_height: int = rules[left_candidate][1]
-        if left_height == right_height:
-          left = left_candidate
-        elif left_height > right_height:
-          left = left_candidate
-          break
-      if left < (right - 1):
-        changed = True
-        del rules[left + 1: right]
-        break
+    rules = list(_compress_pass_left_to_right(rules[::-1]))[::-1]
+    changed = len(rules) < old_size
   return rules
 
 def _total_heights(rules: list[Rule]) -> int:
