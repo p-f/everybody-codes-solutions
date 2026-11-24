@@ -33,12 +33,12 @@ def _sort_using_flips(pieces: list[str]) -> tuple[int, int]:
   return flips, flipped
 
 def part1():
-  pieces: list[str] = list(_read("15-part1.txt"))
+  pieces: list[str] = list(_read("16-part1.txt"))
   flips, _ = _sort_using_flips(pieces)
   print("Part 1", flips, sep="\t")
 
 def part2():
-  pieces: list[str] = list(_read("15-part2.txt")) * 10
+  pieces: list[str] = list(_read("16-part2.txt")) * 10
   _, flipped = _sort_using_flips(pieces)
   print("Part 2", flipped, sep="\t")
 
@@ -68,11 +68,11 @@ def _sort_by_picking(pieces: list[str]) -> int:
   return flips
 
 def part3():
-  pieces: list[str] = list(_read("15-part3.txt")) * 100
+  pieces: list[str] = list(_read("16-part3.txt")) * 100
   flipped = _sort_by_picking(pieces)
   print("Part 2", flipped, sep="\t")
 
-  
+
 def main():
   part1()
   part2()
