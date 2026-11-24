@@ -33,12 +33,12 @@ def _get_dists(grid: Grid) -> list[list[int]]:
   return dist
 
 def part1():
-  grid: Grid = _read("16-part1.txt")
+  grid: Grid = _read("17-part1.txt")
   dist: list[list[int]] = _get_dists(grid)
   print("Part 1:", dist[-1][-1])
 
 def part2():
-  grid: Grid = _read("16-part2.txt")
+  grid: Grid = _read("17-part2.txt")
   dist: list[list[int]] = _get_dists(grid)
   rows: int = len(grid)
   cols: int = len(grid[0])
@@ -124,7 +124,7 @@ def _walk(grid: Grid, start: PosAndDir, before: PosAndDir) -> int:
   return units
 
 def part3():
-  grid: Grid = _read("16-part3.txt")
+  grid: Grid = _read("17-part3.txt")
   res: int = min(
     _walk(grid, (0, 0, Dir.TOP,), (0, 0, Dir.LEFT,)),
     _walk(grid, (0, 0, Dir.LEFT,), (0, 0, Dir.TOP,)))
