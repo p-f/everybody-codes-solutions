@@ -1,7 +1,9 @@
 #!/bin/env python3
 
+from collections import defaultdict
 from typing import Callable
 from operator import add, sub
+from itertools import product, chain
 
 def _read(file: str) -> list[list[str]]:
   lines: list[list[str]] = []
@@ -64,11 +66,105 @@ def part2():
   assert int(int2str11(res), base=11) == res
   print("Part 2:", int2str11(res), sep="\t")
 
+# Characters encoded as binary
+#  11
+# 2  3
+# 2  3
+#  44
+# 5  6
+# 5  6
+#  77
+
+_BIN_ENCODE: dict[str, int] = {
+  "0": 0b1110111,
+  "1": 0b0100100,
+  "2": 0b1011101,
+  "3": 0b1101101,
+  "4": 0b0101110,
+  "5": 0b1101011,
+  "6": 0b1111011,
+  "7": 0b0100101,
+  "8": 0b1111111,
+  "9": 0b1101111,
+  "A": 0b0111111
+}
+
+_BIN_DECODE: dict[int, str] = {enc: c for c, enc in _BIN_ENCODE.items()}
+assert len(_BIN_ENCODE) == len(_BIN_DECODE)
+# Soundness check: segment count
+for c, enc in _BIN_ENCODE.items():
+  bit_count = enc.bit_count()
+  assert _seq_count(c) == bit_count, (c, bit_count)
+
+# Characters that can be turned into other ones by moving 1 segment inside a character
+_IN_PLACE_EDITS: dict[str, set[str]] = defaultdict(set)
+# Characters that can be turned into other ones by removing 1 segment
+_DELETE_EDITS: dict[str, set[str]] = defaultdict(set)
+# Characters that can be turned into other ones by inserting 1 segment
+_INSERT_EDITS: dict[str, set[str]] = defaultdict(set)
+
+_INSERT_EDITS["-"].add("+")
+_DELETE_EDITS["+"].add("-")
+
+for c1, c2 in product(_BIN_ENCODE, repeat=2):
+  if c1 == c2: continue
+  e1: int = _BIN_ENCODE[c1]
+  e2: int = _BIN_ENCODE[c2]
+  diffs: int = (e1 ^ e2).bit_count()
+  # In-place
+  if e1.bit_count() == e2.bit_count() and diffs == 2:
+    _IN_PLACE_EDITS[c1].add(c2)
+  # By removing 1 character
+  if e1.bit_count() - 1 == e2.bit_count() and diffs == 1:
+    _DELETE_EDITS[c1].add(c2)
+    _INSERT_EDITS[c2].add(c1) # Inverse: adding 1
+
+def _is_equal(equation: list[str], num_len: int) -> bool:
+  n1s: str = "".join(equation[0:num_len])
+  n2s: str = "".join(equation[num_len + 1:2 * num_len + 1])
+  n3s: str = "".join(equation[2 * num_len + 2: 3 * num_len + 2])
+  n4s: str = "".join(equation[3 * num_len + 3:])
+  opl: str = equation[num_len]
+  opr: str = equation[3 * num_len + 2]
+  return _OPS[opl](int11(n1s), int11(n2s)) == _OPS[opr](int11(n3s), int11(n4s))
+
+def _can_equalize(equation: list[str], num_len: int) -> list[str]:
+  if _is_equal(equation, num_len):
+    return equation
+  # Try to change a single character
+  for i, c in enumerate(equation):
+    for alt in _IN_PLACE_EDITS[c]:
+      equation[i] = alt
+      if _is_equal(equation, num_len):
+        return equation
+    equation[i] = c
+  # Try to move between 2 characters
+  for i, c in enumerate(equation):
+    for alt_rem in _DELETE_EDITS[c]:
+      equation[i] = alt_rem
+      for j, cj in enumerate(equation):
+        if i == j: continue
+        for alt_ins in _INSERT_EDITS[cj]:
+          equation[j] = alt_ins
+          if _is_equal(equation, num_len):
+            return equation
+        equation[j] = cj
+    equation[i] = c
+  return []
+
+def part3(num_len: int = 4):
+  equations: list[list[str]] = _read("20-part3.txt")
+  res: int = 0
+  for eq in equations:
+    eq = _can_equalize(list(chain(*eq)), num_len)
+    res += sum(_seq_count(c) for c in eq)
+  print("Part 3:", int2str11(res), sep="\t")
+
 
 def main():
   part1()
   part2()
-  # part3()
+  part3()
 
 if __name__ == "__main__":
   main()
